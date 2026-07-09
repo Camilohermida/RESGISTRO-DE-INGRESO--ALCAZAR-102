@@ -141,10 +141,10 @@
     </div>
     <div class="eyebrow">Registro previo</div>
     <h1 class="title" id="hero-title">Antes de tu llegada</h1>
-    <div class="subtitle">Completa este registro rápido. Toma menos de 2 minutos.</div>
+    <div class="subtitle" id="hero-subtitle">Completa este registro rápido. Toma menos de 2 minutos.</div>
   </div>
 
-  <div class="reserva-wrap">
+  <div class="reserva-wrap" id="reserva-wrap">
     <div class="reserva-card" id="reserva-card"></div>
   </div>
 
@@ -291,6 +291,8 @@ document.getElementById('hero-title').textContent = CONFIG.PROPIEDAD;
 
 /* ---------- pintar info de bienvenida (se muestra tras enviar el registro) ---------- */
 function fillWelcomeInfo(){
+  document.getElementById('reserva-wrap').style.display = 'none';
+  document.getElementById('hero-subtitle').textContent = 'Aquí tienes la información para tu llegada.';
   document.getElementById('wel-checkin').textContent = CONFIG.CHECKIN;
   document.getElementById('wel-checkout').textContent = CONFIG.CHECKOUT;
   document.getElementById('wel-ingreso').textContent = CONFIG.INGRESO_TITULO;
