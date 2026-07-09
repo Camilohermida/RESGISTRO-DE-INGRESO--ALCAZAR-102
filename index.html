@@ -212,10 +212,49 @@
   </div>
 
   <div class="content" id="success-content" style="display:none;">
-    <div class="success-wrap">
+    <div class="success-wrap" style="padding-bottom:6px;">
       <div class="success-icon">✓</div>
       <div class="success-title">¡Registro enviado!</div>
-      <div class="success-text">Gracias por completar tu registro previo. Nos vemos pronto en tu llegada.</div>
+      <div class="success-text">Gracias por completar tu registro previo. Aquí tienes toda la información para tu llegada.</div>
+    </div>
+
+    <div class="section-title">Ingreso</div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Acceso</div>
+      <div class="reserva-row"><span class="k">Check-in</span><span class="v" id="wel-checkin"></span></div>
+      <div class="reserva-row"><span class="k">Check-out</span><span class="v" id="wel-checkout"></span></div>
+      <div class="reserva-row" style="border-bottom:none;"><span class="k">Ingreso</span><span class="v" id="wel-ingreso" style="color:var(--cobre);"></span></div>
+      <p class="step-hint" id="wel-instrucciones" style="margin-top:12px; margin-bottom:0;"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Cómo llegar</div>
+      <a class="btn btn-primary" id="wel-maps-link" href="#" target="_blank" rel="noopener" style="display:block; text-decoration:none;">Abrir ubicación en Google Maps</a>
+    </div>
+
+    <div class="section-title">Conectividad</div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>WiFi</div>
+      <div class="reserva-row"><span class="k">Red</span><span class="v" id="wel-wifi-red"></span></div>
+      <div class="reserva-row" style="border-bottom:none;">
+        <span class="k">Clave</span>
+        <span class="v" id="wel-wifi-clave"></span>
+      </div>
+    </div>
+
+    <div class="section-title" id="wel-tiendas-title" style="display:none;">Tiendas y servicios cercanos</div>
+    <div class="card" id="wel-tiendas-card" style="display:none;">
+      <div class="card-title"><span class="dot"></span>Directorio local</div>
+      <div id="wel-tiendas-list"></div>
+    </div>
+
+    <div class="section-title">Anfitrión</div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Contacto directo</div>
+      <div class="acomp-header" style="margin-bottom:0;">
+        <span class="acomp-label">Anfitrión / soporte</span>
+        <a class="remove-btn" style="color:var(--verde);" id="wel-anfitrion-tel" href="#">Llamar</a>
+      </div>
     </div>
   </div>
 
@@ -232,12 +271,51 @@ const CONFIG = {
   CHECKIN: "3:00 p.m.",
   CHECKOUT: "11:00 a.m.",
 
+  // Info de acceso que se muestra automáticamente cuando el huésped termina el registro
+  MAPS_URL: "https://maps.google.com/?q=Calle+104+%2349E-30+Barranquilla",
+  INGRESO_TITULO: "Coordinado",
+  INSTRUCCIONES_INGRESO: "<b>Ingreso coordinado:</b> la entrega de llaves se hace en persona, no hay código fijo. Coordina la hora exacta de llegada con tu anfitrión antes del check-in.",
+  WIFI_RED: "Apto 102",
+  WIFI_CLAVE: "Alcazar2026",
+  TIENDAS: [
+    { nombre: "Tienda del barrio", tag: "Mercado", telefono: "+573003355100" }
+  ],
+  ANFITRION_TEL: "+573008833429",
+
   // Pega aquí la URL de tu Google Apps Script (ver instrucciones en AppsScript.gs)
   GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyCvoOirpV-6ZLlA7A0ciARqF2tmHL_46reh6NAyEtOwh3MAU25JCrkOG3JLJDhZktquw/exec"
 };
 /* ========================================================= */
 
 document.getElementById('hero-title').textContent = CONFIG.PROPIEDAD;
+
+/* ---------- pintar info de bienvenida (se muestra tras enviar el registro) ---------- */
+function fillWelcomeInfo(){
+  document.getElementById('wel-checkin').textContent = CONFIG.CHECKIN;
+  document.getElementById('wel-checkout').textContent = CONFIG.CHECKOUT;
+  document.getElementById('wel-ingreso').textContent = CONFIG.INGRESO_TITULO;
+  document.getElementById('wel-instrucciones').innerHTML = CONFIG.INSTRUCCIONES_INGRESO;
+  document.getElementById('wel-maps-link').href = CONFIG.MAPS_URL;
+  document.getElementById('wel-wifi-red').textContent = CONFIG.WIFI_RED;
+  document.getElementById('wel-wifi-clave').textContent = CONFIG.WIFI_CLAVE;
+  document.getElementById('wel-anfitrion-tel').href = 'tel:' + CONFIG.ANFITRION_TEL;
+
+  if(CONFIG.TIENDAS && CONFIG.TIENDAS.length){
+    document.getElementById('wel-tiendas-title').style.display = 'block';
+    document.getElementById('wel-tiendas-card').style.display = 'block';
+    const list = document.getElementById('wel-tiendas-list');
+    CONFIG.TIENDAS.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'acomp-header';
+      row.style.marginBottom = '10px';
+      row.innerHTML = `
+        <span class="acomp-label">${t.nombre}<br><span style="font-weight:400; color:var(--gris-texto); font-size:11px;">${t.tag||''}</span></span>
+        <a class="remove-btn" style="color:var(--verde);" href="tel:${t.telefono}">Llamar</a>
+      `;
+      list.appendChild(row);
+    });
+  }
+}
 document.getElementById('reserva-card').innerHTML = `
   <div class="reserva-row"><span class="k">Alojamiento</span><span class="v">${CONFIG.PROPIEDAD}</span></div>
   <div class="reserva-row"><span class="k">Dirección</span><span class="v">${CONFIG.DIRECCION}</span></div>
@@ -439,6 +517,7 @@ document.getElementById('submit-email').addEventListener('click', async () => {
 
     if(data.success){
       document.getElementById('form-content').style.display = 'none';
+      fillWelcomeInfo();
       document.getElementById('success-content').style.display = 'block';
     } else {
       alert('No se pudo enviar. Verifica tu conexión e intenta de nuevo.');
